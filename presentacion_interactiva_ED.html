@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modelamiento Financiero con E.D. — Presentación Interactiva</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --navy:   #0D1B2A;
+  --deep:   #1B2F45;
+  --teal:   #0E7C7B;
+  --teal2:  #14A89E;
+  --gold:   #E8A838;
+  --cream:  #F6F0E4;
+  --white:  #FFFFFF;
+  --muted:  #8FA3B1;
+  --danger: #E05C3A;
+  --green:  #2A9D5C;
+  --card:   #162535;
+  --border: rgba(14,124,123,0.25);
+  --glow:   rgba(14,124,123,0.15);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body {
+  font-family:'DM Sans',sans-serif;
+  background:var(--navy);
+  color:var(--cream);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── NOISE TEXTURE OVERLAY ───────────────────────────────────────────── */
+body::before {
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;opacity:.4;
+}
+
+/* ── NAV ─────────────────────────────────────────────────────────────── */
+.nav {
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  background:rgba(13,27,42,0.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+  padding:0 2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  height:56px;
+}
+.nav-brand {
+  font-family:'Playfair Display',serif;
+  font-size:.95rem;color:var(--teal2);letter-spacing:.02em;
+}
+.nav-modules {
+  display:flex;gap:.25rem;
+}
+.nav-dot {
+  width:32px;height:32px;border-radius:50%;
+  border:2px solid var(--border);
+  background:transparent;cursor:pointer;
+  font-size:.7rem;font-weight:600;color:var(--muted);
+  transition:all .2s;display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;
+}
+.nav-dot:hover,.nav-dot.active{
+  border-color:var(--teal);background:var(--teal);color:var(--white);
+}
+.nav-progress {
+  font-size:.75rem;color:var(--muted);
+  font-family:'DM Mono',monospace;
+}
+
+/* ── PROGRESS BAR ────────────────────────────────────────────────────── */
+.progress-bar {
+  position:fixed;top:56px;left:0;right:0;z-index:99;
+  height:3px;background:rgba(255,255,255,.06);
+}
+.progress-fill {
+  height:100%;background:linear-gradient(90deg,var(--teal),var(--teal2));
+  transition:width .4s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── SLIDES ──────────────────────────────────────────────────────────── */
+.slide {
+  display:none;min-height:100vh;padding:80px 2rem 3rem;
+  max-width:1100px;margin:0 auto;
+  animation:fadeUp .45s ease both;
+}
+.slide.active{display:block;}
+
+@keyframes fadeUp {
+  from{opacity:0;transform:translateY(20px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* ── SLIDE 0 — COVER ────────────────────────────────────────────────── */
+.cover {
+  display:none;min-height:100vh;
+  flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:2rem;
+  background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(14,124,123,.18) 0%,transparent 70%);
+  animation:fadeUp .6s ease both;
+}
+.cover.active{display:flex;}
+.cover-badge {
+  font-family:'DM Mono',monospace;font-size:.7rem;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--teal2);
+  border:1px solid var(--teal);padding:.35rem .8rem;border-radius:20px;
+  margin-bottom:2rem;
+}
+.cover h1 {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2rem,5vw,4rem);
+  line-height:1.15;color:var(--white);
+  max-width:800px;margin-bottom:1rem;
+}
+.cover h1 em{color:var(--teal2);font-style:normal;}
+.cover-sub {
+  font-size:1.1rem;color:var(--muted);max-width:580px;
+  line-height:1.7;margin-bottom:2.5rem;
+}
+.cover-authors {
+  display:flex;gap:1.5rem;flex-wrap:wrap;justify-content:center;
+  margin-bottom:3rem;
+}
+.author-chip {
+  background:var(--card);border:1px solid var(--border);
+  padding:.5rem 1rem;border-radius:8px;
+  font-size:.82rem;color:var(--cream);
+}
+.cover-modules {
+  display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center;
+  margin-bottom:3rem;max-width:700px;
+}
+.module-pill {
+  background:var(--deep);border:1px solid var(--border);
+  padding:.45rem 1rem;border-radius:6px;
+  font-size:.78rem;color:var(--muted);cursor:pointer;
+  transition:all .2s;
+}
+.module-pill:hover{border-color:var(--teal);color:var(--teal2);}
+.btn-start {
+  background:var(--teal);color:var(--white);
+  border:none;padding:.9rem 2.5rem;border-radius:10px;
+  font-size:1rem;font-weight:600;cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+  transition:all .2s;letter-spacing:.02em;
+}
+.btn-start:hover{background:var(--teal2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(14,124,123,.35);}
+
+/* ── SLIDE HEADERS ───────────────────────────────────────────────────── */
+.slide-header {
+  margin-bottom:2rem;padding-bottom:1rem;
+  border-bottom:1px solid var(--border);
+}
+.module-tag {
+  font-family:'DM Mono',monospace;font-size:.65rem;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--teal2);margin-bottom:.5rem;
+}
+.slide-header h2 {
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1.5rem,3vw,2.4rem);
+  color:var(--white);line-height:1.25;
+}
+.slide-header p {
+  margin-top:.5rem;color:var(--muted);font-size:.95rem;line-height:1.6;
+}
+
+/* ── CARDS ───────────────────────────────────────────────────────────── */
+.card {
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:1.5rem;
+  transition:border-color .2s,box-shadow .2s;
+}
+.card:hover{border-color:rgba(14,124,123,.5);box-shadow:0 0 24px var(--glow);}
+.card h3 {
+  font-family:'Playfair Display',serif;
+  font-size:1.15rem;color:var(--teal2);margin-bottom:.75rem;
+}
+.card p,.card li{font-size:.9rem;line-height:1.7;color:#b8ccd6;}
+.card ul{padding-left:1.2rem;}
+.card li{margin-bottom:.35rem;}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;}
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;}
+
+@media(max-width:700px){
+  .grid-2,.grid-3{grid-template-columns:1fr;}
+}
+
+/* ── EQUATION DISPLAY ────────────────────────────────────────────────── */
+.eq-block {
+  background:rgba(14,124,123,.08);
+  border:1px solid var(--teal);border-left:4px solid var(--teal);
+  border-radius:0 8px 8px 0;padding:1rem 1.25rem;
+  font-family:'DM Mono',monospace;font-size:.95rem;
+  color:var(--teal2);margin:.75rem 0;
+}
+.eq-label{font-size:.7rem;color:var(--muted);margin-bottom:.25rem;letter-spacing:.08em;}
+
+/* ── STAT CALLOUTS ────────────────────────────────────────────────────── */
+.stat-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1.25rem 0;}
+.stat {
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:1rem 1.5rem;flex:1;min-width:120px;
+  text-align:center;
+}
+.stat-num {
+  font-family:'Playfair Display',serif;
+  font-size:2rem;font-weight:900;color:var(--gold);
+  display:block;line-height:1;
+}
+.stat-label{font-size:.72rem;color:var(--muted);margin-top:.35rem;letter-spacing:.05em;}
+
+/* ── SLIDER CONTROL ──────────────────────────────────────────────────── */
+.control-group{margin-bottom:1.25rem;}
+.control-label {
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:.85rem;color:var(--cream);margin-bottom:.5rem;
+}
+.control-val {
+  font-family:'DM Mono',monospace;color:var(--teal2);
+  font-weight:600;
+}
+input[type=range] {
+  width:100%;-webkit-appearance:none;height:4px;
+  background:rgba(255,255,255,.12);border-radius:4px;outline:none;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none;width:18px;height:18px;
+  background:var(--teal);border-radius:50%;
+  box-shadow:0 0 8px rgba(14,124,123,.6);
+  transition:transform .15s;
+}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
+
+/* ── CANVAS / CHART ──────────────────────────────────────────────────── */
+.chart-wrap {
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:1.25rem;margin:1.25rem 0;
+  position:relative;
+}
+.chart-wrap canvas{display:block;width:100%!important;}
+.chart-title {
+  font-size:.8rem;color:var(--muted);margin-bottom:.75rem;
+  letter-spacing:.06em;text-transform:uppercase;
+}
+
+/* ── ACCORDION (Laplace steps) ───────────────────────────────────────── */
+.accordion {border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:.75rem 0;}
+.acc-head {
+  padding:1rem 1.25rem;background:var(--card);cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:.9rem;font-weight:600;color:var(--cream);
+  transition:background .15s;
+  border:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;
+}
+.acc-head:hover{background:rgba(14,124,123,.12);}
+.acc-icon{font-size:1.2rem;color:var(--teal);transition:transform .25s;}
+.acc-head.open .acc-icon{transform:rotate(45deg);}
+.acc-body {
+  max-height:0;overflow:hidden;transition:max-height .35s ease;
+  background:rgba(14,124,123,.05);
+  border-top:1px solid var(--border);
+}
+.acc-body.open{max-height:600px;}
+.acc-inner{padding:1.1rem 1.25rem;}
+.acc-inner p,.acc-inner li{font-size:.88rem;color:#b8ccd6;line-height:1.7;}
+.acc-inner ul{padding-left:1.1rem;}
+
+/* ── QUIZ ────────────────────────────────────────────────────────────── */
+.quiz-q {
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:1.5rem;margin:.75rem 0;
+}
+.quiz-q .q-text {
+  font-size:.95rem;color:var(--white);margin-bottom:1rem;font-weight:500;
+}
+.quiz-opts{display:flex;flex-direction:column;gap:.5rem;}
+.q-opt {
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:8px;padding:.7rem 1rem;cursor:pointer;
+  font-size:.87rem;color:var(--cream);transition:all .15s;
+  text-align:left;font-family:'DM Sans',sans-serif;
+}
+.q-opt:hover:not(.locked){border-color:var(--teal);background:rgba(14,124,123,.12);}
+.q-opt.correct{border-color:var(--green)!important;background:rgba(42,157,92,.15)!important;color:#7fffd4;}
+.q-opt.wrong{border-color:var(--danger)!important;background:rgba(224,92,58,.15)!important;color:#ffb5a0;}
+.q-opt.locked{cursor:default;}
+.q-feedback {
+  margin-top:.75rem;padding:.6rem 1rem;border-radius:8px;
+  font-size:.84rem;display:none;
+}
+.q-feedback.show{display:block;}
+.q-feedback.ok{background:rgba(42,157,92,.15);color:#7fffd4;border:1px solid var(--green);}
+.q-feedback.no{background:rgba(224,92,58,.15);color:#ffb5a0;border:1px solid var(--danger);}
+
+/* ── TABLE ───────────────────────────────────────────────────────────── */
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);margin:1rem 0;}
+table{border-collapse:collapse;width:100%;font-size:.82rem;}
+thead tr{background:var(--teal);}
+thead th{padding:.7rem 1rem;color:var(--white);font-weight:600;text-align:left;white-space:nowrap;}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.05);}
+tbody tr:nth-child(even){background:rgba(255,255,255,.03);}
+tbody td{padding:.6rem 1rem;color:#b8ccd6;}
+tbody td:first-child{color:var(--cream);font-weight:500;}
+
+/* ── NAV BUTTONS ─────────────────────────────────────────────────────── */
+.slide-nav {
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:2.5rem;padding-top:1.5rem;
+  border-top:1px solid var(--border);
+}
+.btn {
+  padding:.65rem 1.5rem;border-radius:8px;font-size:.88rem;
+  font-weight:600;cursor:pointer;border:none;
+  font-family:'DM Sans',sans-serif;transition:all .2s;
+}
+.btn-outline {
+  background:transparent;border:1px solid var(--border);color:var(--muted);
+}
+.btn-outline:hover{border-color:var(--teal);color:var(--teal2);}
+.btn-primary{background:var(--teal);color:var(--white);}
+.btn-primary:hover{background:var(--teal2);transform:translateY(-1px);}
+.btn-gold{background:var(--gold);color:var(--navy);}
+.btn-gold:hover{filter:brightness(1.1);}
+
+/* ── MODEL TABS ──────────────────────────────────────────────────────── */
+.tabs{display:flex;gap:.5rem;margin-bottom:1.25rem;flex-wrap:wrap;}
+.tab {
+  padding:.45rem 1rem;border-radius:6px;cursor:pointer;
+  font-size:.8rem;font-weight:600;border:1px solid var(--border);
+  color:var(--muted);background:transparent;transition:all .15s;
+  font-family:'DM Sans',sans-serif;
+}
+.tab.active{background:var(--teal);color:var(--white);border-color:var(--teal);}
+.tab:hover:not(.active){border-color:var(--teal);color:var(--teal2);}
+.tab-panel{display:none;animation:fadeUp .3s ease both;}
+.tab-panel.active{display:block;}
+
+/* ── TIMELINE ────────────────────────────────────────────────────────── */
+.timeline{position:relative;padding-left:2rem;}
+.timeline::before{
+  content:'';position:absolute;left:.6rem;top:.5rem;bottom:.5rem;
+  width:2px;background:var(--border);
+}
+.tl-item{position:relative;margin-bottom:1.5rem;}
+.tl-dot {
+  position:absolute;left:-1.85rem;top:.15rem;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--teal);border:2px solid var(--navy);
+  box-shadow:0 0 8px rgba(14,124,123,.5);
+}
+.tl-label{font-size:.7rem;color:var(--teal2);letter-spacing:.07em;margin-bottom:.2rem;}
+.tl-title{font-size:.9rem;font-weight:600;color:var(--white);margin-bottom:.3rem;}
+.tl-desc{font-size:.83rem;color:#8FA3B1;line-height:1.6;}
+
+/* ── FINALE ──────────────────────────────────────────────────────────── */
+.finale {
+  text-align:center;padding:4rem 2rem;
+  background:radial-gradient(ellipse 70% 50% at 50% 50%,rgba(14,124,123,.2),transparent 70%);
+}
+.finale h2{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1.8rem,4vw,3rem);color:var(--white);margin-bottom:1rem;
+}
+.finale p{color:var(--muted);font-size:1rem;max-width:560px;margin:0 auto 2rem;line-height:1.7;}
+.score-badge {
+  display:inline-flex;align-items:center;justify-content:center;
+  width:120px;height:120px;border-radius:50%;
+  background:conic-gradient(var(--teal) 0%,var(--border) 0%);
+  margin:0 auto 2rem;position:relative;
+  font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--white);
+  font-weight:900;
+}
+.score-badge::before{
+  content:'';position:absolute;inset:8px;
+  border-radius:50%;background:var(--navy);
+}
+.score-badge span{position:relative;z-index:1;}
+
+/* ── RECOMMENDATION TABLE (slide 5) ──────────────────────────────────── */
+.rec-card {
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;margin:.75rem 0;
+  cursor:pointer;transition:border-color .2s;
+}
+.rec-card:hover{border-color:var(--teal);}
+.rec-head {
+  padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;
+}
+.rec-profile{font-size:.9rem;font-weight:600;color:var(--white);}
+.rec-model{font-family:'DM Mono',monospace;font-size:.75rem;color:var(--teal2);}
+.rec-capital{
+  font-family:'Playfair Display',serif;font-size:1.4rem;
+  color:var(--gold);font-weight:700;
+}
+.rec-body {
+  max-height:0;overflow:hidden;transition:max-height .3s;
+  border-top:0px solid var(--border);
+}
+.rec-body.open{max-height:200px;border-top:1px solid var(--border);}
+.rec-inner{padding:1rem 1.25rem;}
+.rec-inner p{font-size:.85rem;color:#8FA3B1;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <span class="nav-brand">E.D. Financieras · ABP</span>
+  <div class="nav-modules">
+    <button class="nav-dot active" onclick="goTo(0)" title="Inicio">◆</button>
+    <button class="nav-dot" onclick="goTo(1)" title="Módulo 1">1</button>
+    <button class="nav-dot" onclick="goTo(2)" title="Módulo 2">2</button>
+    <button class="nav-dot" onclick="goTo(3)" title="Módulo 3">3</button>
+    <button class="nav-dot" onclick="goTo(4)" title="Módulo 4">4</button>
+    <button class="nav-dot" onclick="goTo(5)" title="Módulo 5">5</button>
+  </div>
+  <span class="nav-progress" id="navProg">0 / 5</span>
+</nav>
+<div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 0 — PORTADA -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="cover active" id="slide-0">
+  <div class="cover-badge">Presentación Interactiva · Etapa Final ABP</div>
+  <h1>Modelamiento Financiero con <em>Ecuaciones Diferenciales</em></h1>
+  <p class="cover-sub">
+    Una inversión de $2.000.000 COP analizada con 7 modelos matemáticos,
+    desde las E.D. de primer orden hasta la Transformada de Laplace.
+  </p>
+  <div class="cover-authors">
+    <div class="author-chip">Miguel Andrés Palomino Cerquera</div>
+    <div class="author-chip">Wilfred Yessid Galarza Rodríguez</div>
+    <div class="author-chip">David Felipe Cortés Cortés</div>
+  </div>
+  <div class="cover-modules">
+    <div class="module-pill" onclick="goTo(1)">01 · El Problema Financiero</div>
+    <div class="module-pill" onclick="goTo(2)">02 · Modelos de 1.° Orden</div>
+    <div class="module-pill" onclick="goTo(3)">03 · Modelos de 2.° Orden</div>
+    <div class="module-pill" onclick="goTo(4)">04 · Transformadas de Laplace</div>
+    <div class="module-pill" onclick="goTo(5)">05 · Guía del Inversionista</div>
+  </div>
+  <button class="btn-start" onclick="goTo(1)">Comenzar →</button>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 1 — EL PROBLEMA FINANCIERO -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="slide" id="slide-1">
+  <div class="slide-header">
+    <div class="module-tag">Módulo 01 · El Problema</div>
+    <h2>¿Cómo crece tu inversión en el tiempo?</h2>
+    <p>Ajusta los parámetros y observa la proyección del capital en tiempo real.</p>
+  </div>
+
+  <div class="grid-2" style="align-items:start;">
+    <div>
+      <div class="card">
+        <h3>Parámetros de la Inversión</h3>
+        <div class="control-group" style="margin-top:1rem;">
+          <div class="control-label">
+            Capital inicial (COP)
+            <span class="control-val" id="val-capital">$2.000.000</span>
+          </div>
+          <input type="range" id="sl-capital" min="500000" max="10000000" step="100000" value="2000000" oninput="updateChart1()">
+        </div>
+        <div class="control-group">
+          <div class="control-label">
+            Tasa de interés anual
+            <span class="control-val" id="val-tasa">5.0 %</span>
+          </div>
+          <input type="range" id="sl-tasa" min="1" max="20" step="0.5" value="5" oninput="updateChart1()">
+        </div>
+        <div class="control-group">
+          <div class="control-label">
+            Aporte mensual (COP)
+            <span class="control-val" id="val-aporte">$0</span>
+          </div>
+          <input type="range" id="sl-aporte" min="0" max="2000000" step="50000" value="0" oninput="updateChart1()">
+        </div>
+        <div class="control-group">
+          <div class="control-label">
+            Inflación anual
+            <span class="control-val" id="val-inflation">2.0 %</span>
+          </div>
+          <input type="range" id="sl-inflation" min="0" max="15" step="0.5" value="2" oninput="updateChart1()">
+        </div>
+      </div>
+
+      <div class="stat-row" style="margin-top:1rem;">
+        <div class="stat">
+          <span class="stat-num" id="st-5">$3.3M</span>
+          <div class="stat-label">A 5 años</div>
+        </div>
+        <div class="stat">
+          <span class="stat-num" id="st-10">$3.3M</span>
+          <div class="stat-label">A 10 años</div>
+        </div>
+        <div class="stat">
+          <span class="stat-num" id="st-20">$5.4M</span>
+          <div class="stat-label">A 20 años</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="chart-wrap">
+        <div class="chart-title">Capital P(t) vs. Tiempo — Modelo Básico</div>
+        <canvas id="chartM1" height="220"></canvas>
+      </div>
+      <div class="card" style="margin-top:1rem;">
+        <h3>Ecuación del Modelo</h3>
+        <div class="eq-label">E.D. DE PRIMER ORDEN</div>
+        <div class="eq-block" id="eq-display">P'(t) = 0.05·P(t)</div>
+        <div class="eq-label" style="margin-top:.5rem;">SOLUCIÓN ANALÍTICA</div>
+        <div class="eq-block" id="sol-display">P(t) = P₀·e^(0.05t)</div>
+        <p style="margin-top:.75rem;font-size:.82rem;color:var(--muted);">
+          La ecuación diferencial describe la tasa de cambio del capital.
+          Cuando hay aportes constantes A, el modelo se convierte en no homogéneo.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-nav">
+    <button class="btn btn-outline" onclick="goTo(0)">← Inicio</button>
+    <button class="btn btn-primary" onclick="goTo(2)">Módulo 2: Primer Orden →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 2 — MODELOS DE 1.° ORDEN -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="slide" id="slide-2">
+  <div class="slide-header">
+    <div class="module-tag">Módulo 02 · Etapa 1</div>
+    <h2>Modelos de Primer Orden</h2>
+    <p>Tres escenarios que describen el crecimiento del capital con ecuaciones diferenciales de primer orden.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('m1',this)">E1-M1: Interés Continuo</button>
+    <button class="tab" onclick="switchTab('m2',this)">E1-M2: Con Aportes</button>
+    <button class="tab" onclick="switchTab('m3',this)">E1-M3: Con Inflación</button>
+    <button class="tab" onclick="switchTab('m1cmp',this)">↔ Comparativa</button>
+  </div>
+
+  <div class="tab-panel active" id="tp-m1">
+    <div class="grid-2" style="align-items:start;">
+      <div>
+        <div class="card">
+          <h3>Modelo E1-M1 — Crecimiento Exponencial Puro</h3>
+          <p>Una inversión que crece únicamente con interés compuesto continuo al 5% anual, sin retiros ni aportes.</p>
+          <div class="eq-label" style="margin-top:1rem;">ECUACIÓN DIFERENCIAL</div>
+          <div class="eq-block">P'(t) = 0.05·P(t)</div>
+          <div class="eq-label">SOLUCIÓN (sep. de variables)</div>
+          <div class="eq-block">P(t) = 2·e^(0.05t)</div>
+          <div class="eq-label">CONDICIÓN INICIAL</div>
+          <div class="eq-block">P(0) = $2.000.000 COP</div>
+        </div>
+        <div class="stat-row" style="margin-top:1rem;">
+          <div class="stat"><span class="stat-num">$2.56M</span><div class="stat-label">Año 5</div></div>
+          <div class="stat"><span class="stat-num">$3.30M</span><div class="stat-label">Año 10</div></div>
+          <div class="stat"><span class="stat-num">$5.44M</span><div class="stat-label">Año 20</div></div>
+        </div>
+      </div>
+      <div class="chart-wrap"><div class="chart-title">P(t) = 2·e^(0.05t) — Crecimiento exponencial</div><canvas id="c-m1" height="240"></canvas></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tp-m2">
+    <div class="grid-2" style="align-items:start;">
+      <div>
+        <div class="card">
+          <h3>Modelo E1-M2 — Aportes Constantes</h3>
+          <p>El inversionista deposita $500.000 COP anuales adicionales. La E.D. se vuelve no homogénea.</p>
+          <div class="eq-label" style="margin-top:1rem;">ECUACIÓN DIFERENCIAL</div>
+          <div class="eq-block">P'(t) = 0.05·P(t) + 0.5</div>
+          <div class="eq-label">SOLUCIÓN (factor integrante)</div>
+          <div class="eq-block">P(t) = 12·e^(0.05t) − 10</div>
+          <div class="eq-label">INTERPRETACIÓN</div>
+          <p style="font-size:.85rem;color:#8FA3B1;margin-top:.5rem;line-height:1.6;">El término −10 es el capital de "equilibrio negativo": si no se hubiera invertido el capital inicial, los aportes solos no generarían crecimiento hasta t ≈ 18 años. El término 12·e^(0.05t) domina rápidamente.</p>
+        </div>
+        <div class="stat-row" style="margin-top:1rem;">
+          <div class="stat"><span class="stat-num">$5.05M</span><div class="stat-label">Año 5</div></div>
+          <div class="stat"><span class="stat-num">$9.84M</span><div class="stat-label">Año 10</div></div>
+          <div class="stat"><span class="stat-num">$29.4M</span><div class="stat-label">Año 20</div></div>
+        </div>
+      </div>
+      <div class="chart-wrap"><div class="chart-title">Con aportes vs. sin aportes</div><canvas id="c-m2" height="240"></canvas></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tp-m3">
+    <div class="grid-2" style="align-items:start;">
+      <div>
+        <div class="card">
+          <h3>Modelo E1-M3 — Tasa Real (con Inflación)</h3>
+          <p>La inflación del 2% reduce la tasa efectiva al 3% anual. El capital crece más lento en términos reales.</p>
+          <div class="eq-label" style="margin-top:1rem;">TASA REAL (Fisher)</div>
+          <div class="eq-block">r_real = r_nom − π = 5% − 2% = 3%</div>
+          <div class="eq-label">ECUACIÓN DIFERENCIAL</div>
+          <div class="eq-block">P'(t) = 0.03·P(t)</div>
+          <div class="eq-label">SOLUCIÓN</div>
+          <div class="eq-block">P(t) = 2·e^(0.03t)</div>
+          <div style="margin-top:.75rem;background:rgba(224,92,58,.1);border:1px solid var(--danger);border-radius:8px;padding:.8rem;">
+            <p style="font-size:.83rem;color:#ffb5a0;">⚠️ La inflación erosiona el 40% del rendimiento nominal. A 20 años la diferencia es de $1.9M COP respecto al modelo sin inflación.</p>
+          </div>
+        </div>
+        <div class="stat-row" style="margin-top:1rem;">
+          <div class="stat"><span class="stat-num">$2.32M</span><div class="stat-label">Año 5</div></div>
+          <div class="stat"><span class="stat-num">$2.70M</span><div class="stat-label">Año 10</div></div>
+          <div class="stat"><span class="stat-num">$3.64M</span><div class="stat-label">Año 20</div></div>
+        </div>
+      </div>
+      <div class="chart-wrap"><div class="chart-title">Tasa nominal vs. tasa real</div><canvas id="c-m3" height="240"></canvas></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tp-m1cmp">
+    <div class="chart-wrap"><div class="chart-title">Comparativa de los 3 modelos de primer orden</div><canvas id="c-cmp1" height="300"></canvas></div>
+    <div class="grid-3" style="margin-top:1rem;">
+      <div class="card"><h3 style="color:var(--teal2);">E1-M1</h3><p>Crecimiento base exponencial. Sin aportes. La referencia de comparación.</p></div>
+      <div class="card"><h3 style="color:var(--gold);">E1-M2</h3><p>Los aportes constantes multiplican el capital final ×3. La estrategia más efectiva de primer orden.</p></div>
+      <div class="card"><h3 style="color:var(--danger);">E1-M3</h3><p>La inflación es silenciosa pero poderosa. Ignorarla sobreestima el rendimiento real.</p></div>
+    </div>
+  </div>
+
+  <div class="slide-nav">
+    <button class="btn btn-outline" onclick="goTo(1)">← Módulo 1</button>
+    <button class="btn btn-primary" onclick="goTo(3)">Módulo 3: Segundo Orden →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 3 — MODELOS DE 2.° ORDEN -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="slide" id="slide-3">
+  <div class="slide-header">
+    <div class="module-tag">Módulo 03 · Etapa 2</div>
+    <h2>Modelos de Segundo Orden</h2>
+    <p>Cuando el mercado tiene inercia y amortiguamiento. Cuatro modelos con fenómenos cualitativamente distintos.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('s1',this)">E2-M1: Homogéneo</button>
+    <button class="tab" onclick="switchTab('s2',this)">E2-M2: Oscilatorio</button>
+    <button class="tab" onclick="switchTab('s3',this)">E2-M3: Resonancia</button>
+    <button class="tab" onclick="switchTab('s4',this)">E2-M4: Cauchy-Euler</button>
+  </div>
+
+  <div class="tab-panel active" id="tp-s1">
+    <div class="grid-2" style="align-items:start;">
+      <div>
+        <div class="card">
+          <h3>Sistema Sobreamortiguado</h3>
+          <div class="eq-block">P''(t) + 3P'(t) + 2P(t) = 0</div>
+          <p style="font-size:.85rem;color:#8FA3B1;margin:.75rem 0;">Δ = b² − 4ac = 9 − 8 = <strong style="color:var(--teal2);">1 > 0</strong> → Sobreamortiguado</p>
+          <div class="eq-block">r₁ = −1,  r₂ = −2</div>
+          <div class="eq-block">P(t) = 4.1e^(−t) − 2.1e^(−2t)</div>
+          <div style="margin-top:.75rem;background:rgba(14,124,123,.1);border:1px solid var(--teal);border-radius:8px;padding:.8rem;">
+            <p style="font-size:.83rem;color:var(--cream);">💡 Las fuerzas de resistencia del mercado superan la recuperación. Sin aportes, el capital se disipa completamente.</p>
+          </div>
+        </div>
+      </div>
+      <div class="chart-wrap"><div class="chart-title">P(t) → 0 cuando t → ∞ (sin estímulo externo)</div><canvas id="c-s1" height="250"></canvas></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tp-s2">
+    <div class="grid-2" style="align-items:start;">
+      <div>
+        <div class="card">
+          <h3>Aportes Periódicos — Coef. Indeterminados</h3>
+          <div class="eq-block">P'' + 3P' + 2P = 10·cos(t)</div>
+          <div class="eq-block">P(t) = −0.9e^(−t) + 1.9e^(−2t) + cos(t) + 3sin(t)</div>
+          <div style="margin-top:.75rem;">
+            <p style="font-size:.82rem;color:#8FA3B1;margin-bottom:.5rem;"><strong style="color:var(--cream);">Parte transitoria:</strong> −0.9e^(−t) + 1.9e^(−2t) → 0</p>
+            <p style="font-size:.82rem;color:#8FA3B1;"><strong style="color:var(--gold);">Parte estacionaria:</strong> cos(t) + 3sin(t)</p>
+            <p style="font-size:.82rem;color:#8FA3B1;margin-top:.5rem;">Amplitud = √(1² + 3²) = <strong style="color:var(--gold);">√10 ≈ $3.16M COP</strong> — Capital sostenido indefinidamente.</p>
+          </div>
+        </div>
+      </div>
+      <div class="chart-wrap"><div class="chart-title">Transitoria + Estacionaria = Solución completa</div><canvas id="c-s2" height="250"></canvas></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tp-s3">
+    <div class="grid-2" style="align-items:start;">
+      <div>
+        <div class="card">
+          <h3>Cuasi-Resonancia — Variación de Parámetros</h3>
+          <div class="eq-block">P'' + 3P' + 2P = 2e^(−t)</div>
+          <p style="font-size:.83rem;color:var(--danger);margin:.5rem 0;">⚡ f(t) = 2e^(−t) comparte forma con y₁ = e^(−t) → Cuasi-resonancia</p>
+          <div class="eq-block">y_p = 2e^(−t)(t − 1)  →  factor secular te^(−t)</div>
+          <div class="eq-block">P(t) = (2.1 + 2t)e^(−t) − 0.1e^(−2t)</div>
+          <div style="margin-top:.75rem;background:rgba(224,92,58,.1);border:1px solid var(--danger);border-radius:8px;padding:.8rem;">
+            <p style="font-size:.83rem;color:#ffb5a0;">El capital tiene un máximo local alrededor de t ≈ 1 año, luego decae. Modela aportes que inicialmente ayudan pero son insuficientes a largo plazo.</p>
+          </div>
+        </div>
+      </div>
+      <div class="chart-wrap"><div class="chart-title">Máximo local por cuasi-resonancia</div><canvas id="c-s3" height="250"></canvas></div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tp-s4">
+    <div class="grid-2" style="align-items:start;">
+      <div>
+        <div class="card">
+          <h3>Largo Plazo — Ecuación de Cauchy-Euler</h3>
+          <div class="eq-block">t²P'' + tP' − P = t²  (t > 0)</div>
+          <div class="eq-label">ECUACIÓN INDICIAL: n² − 1 = 0</div>
+          <div class="eq-block">n₁ = 1,  n₂ = −1  →  P_h = C₁t + C₂/t</div>
+          <div class="eq-block">P(t) = 0.55t + 1.117/t + t²/3</div>
+          <div style="margin-top:.75rem;">
+            <p style="font-size:.82rem;color:#8FA3B1;margin-bottom:.3rem;">• <strong style="color:var(--cream);">0.55t</strong>: crecimiento lineal (rendimiento base)</p>
+            <p style="font-size:.82rem;color:#8FA3B1;margin-bottom:.3rem;">• <strong style="color:var(--cream);">1.117/t</strong>: efecto decreciente de condiciones iniciales</p>
+            <p style="font-size:.82rem;color:#8FA3B1;">• <strong style="color:var(--gold);">t²/3</strong>: crecimiento cuadrático dominante → P(10) ≈ $42M COP</p>
+          </div>
+        </div>
+      </div>
+      <div class="chart-wrap"><div class="chart-title">Crecimiento cuadrático t²/3 domina a largo plazo</div><canvas id="c-s4" height="250"></canvas></div>
+    </div>
+  </div>
+
+  <div class="slide-nav">
+    <button class="btn btn-outline" onclick="goTo(2)">← Módulo 2</button>
+    <button class="btn btn-primary" onclick="goTo(4)">Módulo 4: Laplace →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 4 — TRANSFORMADAS DE LAPLACE -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="slide" id="slide-4">
+  <div class="slide-header">
+    <div class="module-tag">Módulo 04 · Transformadas de Laplace</div>
+    <h2>Del dominio del tiempo al dominio de frecuencia</h2>
+    <p>Resolución paso a paso del Modelo E2-M2 mediante la Transformada de Laplace. Expande cada paso.</p>
+  </div>
+
+  <div class="grid-2" style="align-items:start;margin-bottom:1.25rem;">
+    <div class="card">
+      <h3>¿Qué es la Transformada de Laplace?</h3>
+      <div class="eq-block">ℒ{f(t)} = F(s) = ∫₀^∞ e^(−st) f(t) dt</div>
+      <p style="font-size:.85rem;color:#8FA3B1;line-height:1.6;">Convierte una E.D. (dominio t) en una ecuación algebraica (dominio s). Las condiciones iniciales se incorporan automáticamente.</p>
+    </div>
+    <div class="chart-wrap" style="margin:0;">
+      <div class="chart-title">P(s) en el dominio de frecuencia compleja s</div>
+      <canvas id="c-laplace" height="180"></canvas>
+    </div>
+  </div>
+
+  <p style="font-size:.9rem;color:var(--cream);font-weight:600;margin-bottom:.75rem;">Resolución de: P'' + 3P' + 2P = 10cos(t),  P(0) = 2,  P'(0) = 0.1</p>
+
+  <div class="accordion">
+    <button class="acc-head" onclick="toggleAcc(this)"><span>Paso 1 — Aplicar ℒ a ambos lados</span><span class="acc-icon">+</span></button>
+    <div class="acc-body">
+      <div class="acc-inner">
+        <div class="eq-block">ℒ{P''} + 3ℒ{P'} + 2ℒ{P} = ℒ{10cos(t)}</div>
+        <div class="eq-block">[s²P(s) − 2s − 0.1] + 3[sP(s) − 2] + 2P(s) = 10s/(s²+1)</div>
+        <p>Las condiciones iniciales P(0)=2 y P'(0)=0.1 aparecen automáticamente en la ecuación transformada.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <button class="acc-head" onclick="toggleAcc(this)"><span>Paso 2 — Despejar P(s)</span><span class="acc-icon">+</span></button>
+    <div class="acc-body">
+      <div class="acc-inner">
+        <div class="eq-block">(s²+3s+2)·P(s) = 10s/(s²+1) + 2s + 6.1</div>
+        <div class="eq-block">P(s) = 10s/[(s²+1)(s+1)(s+2)] + (2s+6.1)/[(s+1)(s+2)]</div>
+        <p>La ecuación diferencial se convirtió en una ecuación algebraica. Solo queda factorizar y aplicar transformada inversa.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <button class="acc-head" onclick="toggleAcc(this)"><span>Paso 3 — Fracciones parciales de (2s+6.1)/[(s+1)(s+2)]</span><span class="acc-icon">+</span></button>
+    <div class="acc-body">
+      <div class="acc-inner">
+        <div class="eq-block">(2s+6.1)/[(s+1)(s+2)] = A/(s+1) + B/(s+2)</div>
+        <p>Evaluando en s=−1: A = (−2+6.1)/1 = <strong style="color:var(--teal2);">4.1</strong></p>
+        <p>Evaluando en s=−2: B = (−4+6.1)/(−1) = <strong style="color:var(--teal2);">−2.1</strong></p>
+        <div class="eq-block">P₁(s) = 4.1/(s+1) − 2.1/(s+2)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <button class="acc-head" onclick="toggleAcc(this)"><span>Paso 4 — Fracciones parciales de 10s/[(s²+1)(s+1)(s+2)]</span><span class="acc-icon">+</span></button>
+    <div class="acc-body">
+      <div class="acc-inner">
+        <div class="eq-block">10s/[(s²+1)(s+1)(s+2)] = (As+B)/(s²+1) + C/(s+1) + D/(s+2)</div>
+        <p>C = 10(−1)/[(2)(1)] = <strong style="color:var(--teal2);">−5</strong>;  D = 10(−2)/[(5)(−1)] = <strong style="color:var(--teal2);">4</strong>;  A = 1,  B = 3</p>
+        <div class="eq-block">P₂(s) = (s+3)/(s²+1) − 5/(s+1) + 4/(s+2)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="accordion">
+    <button class="acc-head" onclick="toggleAcc(this)"><span>Paso 5 — Transformada Inversa (1.er Teorema de Traslación)</span><span class="acc-icon">+</span></button>
+    <div class="acc-body">
+      <div class="acc-inner">
+        <div class="eq-block">P(s) = −0.9/(s+1) + 1.9/(s+2) + s/(s²+1) + 3/(s²+1)</div>
+        <p>Aplicando ℒ⁻¹{1/(s+a)} = e^(−at) y ℒ⁻¹{s/(s²+1)} = cos(t):</p>
+        <div class="eq-block" style="border-color:var(--gold);color:var(--gold);">P(t) = −0.9e^(−t) + 1.9e^(−2t) + cos(t) + 3sin(t) ✓</div>
+        <p>¡Idéntico al resultado de coeficientes indeterminados! La Transformada de Laplace <em>verifica</em> toda la Etapa 2.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-3" style="margin-top:1.25rem;">
+    <div class="card">
+      <h3 style="font-size:.9rem;">1.er Teorema de Traslación</h3>
+      <div class="eq-block" style="font-size:.8rem;">ℒ{e^(at)f(t)} = F(s−a)</div>
+      <p style="font-size:.8rem;">Produce los términos e^(rt) de la solución homogénea.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-size:.9rem;">2.do Teorema de Traslación</h3>
+      <div class="eq-block" style="font-size:.8rem;">ℒ{f(t−a)U(t−a)} = e^(−as)F(s)</div>
+      <p style="font-size:.8rem;">Modela aportes que comienzan en t=a años.</p>
+    </div>
+    <div class="card">
+      <h3 style="font-size:.9rem;">Teorema de Convolución</h3>
+      <div class="eq-block" style="font-size:.8rem;">ℒ{f*g} = F(s)·G(s)</div>
+      <p style="font-size:.8rem;">Capital total = respuesta al impulso * perfil de aportes.</p>
+    </div>
+  </div>
+
+  <div class="slide-nav">
+    <button class="btn btn-outline" onclick="goTo(3)">← Módulo 3</button>
+    <button class="btn btn-primary" onclick="goTo(5)">Módulo 5: Guía Final →</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 5 — GUÍA DEL INVERSIONISTA + QUIZ -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<div class="slide" id="slide-5">
+  <div class="slide-header">
+    <div class="module-tag">Módulo 05 · Conclusiones</div>
+    <h2>Guía del Inversionista & Quiz Final</h2>
+    <p>Selecciona tu perfil para ver la recomendación del modelo. Luego pon a prueba lo aprendido.</p>
+  </div>
+
+  <div style="margin-bottom:1.5rem;">
+    <p style="font-size:.88rem;color:var(--muted);margin-bottom:.75rem;">▼ Haz clic en cada perfil para ver el modelo recomendado y la proyección a 10 años:</p>
+    <div id="rec-list"></div>
+  </div>
+
+  <div class="chart-wrap" style="margin-bottom:1.5rem;">
+    <div class="chart-title">Visión integral — Los 7 modelos del proyecto</div>
+    <canvas id="c-all7" height="280"></canvas>
+  </div>
+
+  <h3 style="font-family:'Playfair Display',serif;color:var(--white);margin-bottom:1rem;font-size:1.3rem;">Quiz de Autoevaluación</h3>
+  <p style="font-size:.85rem;color:var(--muted);margin-bottom:1rem;">5 preguntas para verificar tu comprensión del proyecto. Haz clic en la respuesta correcta.</p>
+
+  <div id="quiz-container"></div>
+
+  <div id="quiz-result" style="display:none;text-align:center;padding:2rem;margin-top:1rem;">
+    <div class="score-badge" id="score-badge"><span id="score-text">5/5</span></div>
+    <h3 style="font-family:'Playfair Display',serif;color:var(--white);font-size:1.4rem;margin-bottom:.5rem;" id="score-title">¡Excelente!</h3>
+    <p style="color:var(--muted);font-size:.9rem;" id="score-msg">Demuestras dominio avanzado de los contenidos del curso.</p>
+  </div>
+
+  <div class="slide-nav">
+    <button class="btn btn-outline" onclick="goTo(4)">← Módulo 4</button>
+    <button class="btn btn-gold" onclick="goTo(0)">↩ Volver al Inicio</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- SCRIPTS -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<script>
+// ── NAVIGATION ──────────────────────────────────────────────────────────────
+let current = 0;
+const total = 5;
+const chartsDrawn = {};
+
+function goTo(n) {
+  document.querySelectorAll('.slide,.cover').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-dot').forEach((d,i) => d.classList.toggle('active', i === n));
+  document.getElementById('slide-' + n).classList.add('active');
+  document.getElementById('navProg').textContent = n === 0 ? '0 / 5' : n + ' / ' + total;
+  document.getElementById('progFill').style.width = (n / total * 100) + '%';
+  current = n;
+  window.scrollTo(0, 0);
+  if (n === 1 && !chartsDrawn[1]) { setTimeout(() => { drawModule1Charts(); chartsDrawn[1] = true; }, 50); }
+  if (n === 2 && !chartsDrawn[2]) { setTimeout(() => { drawModule2Charts(); chartsDrawn[2] = true; }, 50); }
+  if (n === 3 && !chartsDrawn[3]) { setTimeout(() => { drawModule3Charts(); chartsDrawn[3] = true; }, 50); }
+  if (n === 4 && !chartsDrawn[4]) { setTimeout(() => { drawLaplaceChart(); chartsDrawn[4] = true; }, 50); }
+  if (n === 5 && !chartsDrawn[5]) { setTimeout(() => { drawAllChart(); buildRec(); buildQuiz(); chartsDrawn[5] = true; }, 50); }
+}
+
+// ── TAB SWITCHER ──────────────────────────────────────────────────────────────
+function switchTab(id, btn) {
+  const slide = btn.closest('.slide');
+  slide.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  slide.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tp-' + id).classList.add('active');
+  // Draw chart for this tab if needed
+  const charts = { m1:'c-m1', m2:'c-m2', m3:'c-m3', m1cmp:'c-cmp1', s1:'c-s1', s2:'c-s2', s3:'c-s3', s4:'c-s4' };
+  if (charts[id] && !chartsDrawn['t-'+id]) {
+    chartsDrawn['t-'+id] = true;
+    setTimeout(() => drawByTabId(id), 50);
+  }
+}
+
+function drawByTabId(id) {
+  if (id === 'm1') drawLineChart('c-m1', [t => 2*Math.exp(0.05*t)], ['E1-M1'], ['#0E7C7B'], [0,10], 'M COP');
+  if (id === 'm2') drawLineChart('c-m2', [t => 2*Math.exp(0.05*t), t => 12*Math.exp(0.05*t)-10], ['Sin aportes','Con aportes'], ['#8FA3B1','#E8A838'], [0,10], 'M COP');
+  if (id === 'm3') drawLineChart('c-m3', [t => 2*Math.exp(0.05*t), t => 2*Math.exp(0.03*t)], ['Nominal (5%)','Real (3%)'], ['#0E7C7B','#E05C3A'], [0,10], 'M COP');
+  if (id === 'm1cmp') drawLineChart('c-cmp1', [t => 2*Math.exp(0.05*t), t => 12*Math.exp(0.05*t)-10, t => 2*Math.exp(0.03*t)], ['E1-M1','E1-M2','E1-M3'], ['#0E7C7B','#E8A838','#E05C3A'], [0,10], 'M COP');
+  if (id === 's1') drawLineChart('c-s1', [t => 4.1*Math.exp(-t)-2.1*Math.exp(-2*t)], ['E2-M1'], ['#0E7C7B'], [0,6], 'M COP');
+  if (id === 's2') {
+    drawLineChart('c-s2', [
+      t => -0.9*Math.exp(-t)+1.9*Math.exp(-2*t),
+      t => Math.cos(t)+3*Math.sin(t),
+      t => -0.9*Math.exp(-t)+1.9*Math.exp(-2*t)+Math.cos(t)+3*Math.sin(t)
+    ], ['Transitoria','Estacionaria','Completa'], ['#8FA3B1','#E8A838','#0E7C7B'], [0,10], 'M COP');
+  }
+  if (id === 's3') drawLineChart('c-s3', [t => (2.1+2*t)*Math.exp(-t)-0.1*Math.exp(-2*t)], ['E2-M3'], ['#E05C3A'], [0,8], 'M COP');
+  if (id === 's4') {
+    const t4 = (t) => 0.55*t + 1.117/t + t*t/3;
+    drawLineChart('c-s4', [t4], ['E2-M4 (Cauchy-Euler)'], ['#E8A838'], [1,10], 'M COP');
+  }
+}
+
+// ── ACCORDION ─────────────────────────────────────────────────────────────────
+function toggleAcc(btn) {
+  const body = btn.nextElementSibling;
+  const isOpen = body.classList.contains('open');
+  btn.closest('.slide').querySelectorAll('.acc-body').forEach(b => b.classList.remove('open'));
+  btn.closest('.slide').querySelectorAll('.acc-head').forEach(b => b.classList.remove('open'));
+  if (!isOpen) { body.classList.add('open'); btn.classList.add('open'); }
+}
+
+// ── CANVAS CHART ENGINE ───────────────────────────────────────────────────────
+function drawLineChart(canvasId, fns, labels, colors, xRange, yLabel) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.offsetWidth || 600, H = canvas.height || 240;
+  canvas.width = W; canvas.height = H;
+
+  const PAD = { t:10, r:20, b:40, l:55 };
+  const pts = 200;
+  const [x0, x1] = xRange;
+
+  // Compute y range
+  let yMin = Infinity, yMax = -Infinity;
+  fns.forEach(f => {
+    for (let i = 0; i <= pts; i++) {
+      const t = x0 + (x1 - x0) * i / pts;
+      const v = f(t);
+      if (isFinite(v)) { yMin = Math.min(yMin, v); yMax = Math.max(yMax, v); }
+    }
+  });
+  const pad = (yMax - yMin) * 0.1 || 0.5;
+  yMin -= pad; yMax += pad;
+
+  const toX = x => PAD.l + (x - x0) / (x1 - x0) * (W - PAD.l - PAD.r);
+  const toY = y => PAD.t + (1 - (y - yMin) / (yMax - yMin)) * (H - PAD.t - PAD.b);
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1;
+  for (let i = 0; i <= 5; i++) {
+    const y = yMin + (yMax - yMin) * i / 5;
+    ctx.beginPath(); ctx.moveTo(PAD.l, toY(y)); ctx.lineTo(W - PAD.r, toY(y)); ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(PAD.l, PAD.t); ctx.lineTo(PAD.l, H - PAD.b); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PAD.l, H - PAD.b); ctx.lineTo(W - PAD.r, H - PAD.b); ctx.stroke();
+
+  // Zero line if needed
+  if (yMin < 0 && yMax > 0) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(PAD.l, toY(0)); ctx.lineTo(W - PAD.r, toY(0)); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  // Axis labels
+  ctx.fillStyle = '#8FA3B1'; ctx.font = '10px DM Mono,monospace'; ctx.textAlign = 'right';
+  for (let i = 0; i <= 5; i++) {
+    const y = yMin + (yMax - yMin) * i / 5;
+    ctx.fillText(y.toFixed(1), PAD.l - 6, toY(y) + 4);
+  }
+  ctx.textAlign = 'center';
+  for (let x = Math.ceil(x0); x <= x1; x += (x1 - x0 > 5 ? 2 : 1)) {
+    ctx.fillText(x, toX(x), H - PAD.b + 14);
+  }
+  ctx.fillStyle = '#8FA3B1'; ctx.font = '9px DM Mono,monospace'; ctx.textAlign = 'center';
+  ctx.fillText('t (años)', PAD.l + (W - PAD.l - PAD.r) / 2, H - 4);
+
+  // Lines
+  fns.forEach((f, fi) => {
+    ctx.strokeStyle = colors[fi]; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+    ctx.beginPath();
+    let first = true;
+    for (let i = 0; i <= pts; i++) {
+      const t = x0 + (x1 - x0) * i / pts;
+      const v = f(t);
+      if (!isFinite(v)) { first = true; continue; }
+      if (first) { ctx.moveTo(toX(t), toY(v)); first = false; } else { ctx.lineTo(toX(t), toY(v)); }
+    }
+    ctx.stroke();
+  });
+
+  // Legend
+  if (labels.length > 1) {
+    ctx.font = '10px DM Sans,sans-serif'; ctx.textAlign = 'left';
+    let lx = PAD.l + 8, ly = PAD.t + 14;
+    labels.forEach((l, i) => {
+      ctx.fillStyle = colors[i];
+      ctx.fillRect(lx, ly - 8, 16, 3);
+      ctx.fillStyle = '#ccc';
+      ctx.fillText(l, lx + 20, ly);
+      lx += ctx.measureText(l).width + 40;
+      if (lx > W - 80) { lx = PAD.l + 8; ly += 16; }
+    });
+  }
+}
+
+// ── MODULE 1: SIMULATOR ───────────────────────────────────────────────────────
+function fmt(n) {
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(2) + 'M';
+  return '$' + Math.round(n).toLocaleString();
+}
+function updateChart1() {
+  const P0 = +document.getElementById('sl-capital').value / 1e6;
+  const r  = +document.getElementById('sl-tasa').value / 100;
+  const A  = +document.getElementById('sl-aporte').value * 12 / 1e6;
+  const pi = +document.getElementById('sl-inflation').value / 100;
+  const rr = r - pi;
+
+  document.getElementById('val-capital').textContent = '$' + (+document.getElementById('sl-capital').value).toLocaleString();
+  document.getElementById('val-tasa').textContent = (+document.getElementById('sl-tasa').value).toFixed(1) + ' %';
+  document.getElementById('val-aporte').textContent = fmt(+document.getElementById('sl-aporte').value);
+  document.getElementById('val-inflation').textContent = (+document.getElementById('sl-inflation').value).toFixed(1) + ' %';
+
+  const P = t => A === 0
+    ? P0 * Math.exp(rr * t)
+    : (P0 + A/rr) * Math.exp(rr * t) - A/rr;
+
+  document.getElementById('st-5').textContent  = fmt(P(5)  * 1e6);
+  document.getElementById('st-10').textContent = fmt(P(10) * 1e6);
+  document.getElementById('st-20').textContent = fmt(P(20) * 1e6);
+
+  const eqStr = A > 0
+    ? `P'(t) = ${rr.toFixed(3)}·P(t) + ${A.toFixed(2)}`
+    : `P'(t) = ${rr.toFixed(3)}·P(t)`;
+  document.getElementById('eq-display').textContent = eqStr;
+  document.getElementById('sol-display').textContent = A > 0
+    ? `P(t) = (P₀+A/r)·e^(${rr.toFixed(3)}t) − A/r`
+    : `P(t) = P₀·e^(${rr.toFixed(3)}t)`;
+
+  drawLineChart('chartM1', [P], ['P(t)'], ['#0E7C7B'], [0, 20], 'M COP');
+}
+
+function drawModule1Charts() { updateChart1(); }
+function drawModule2Charts() {
+  setTimeout(() => drawLineChart('c-m1', [t => 2*Math.exp(0.05*t)], ['E1-M1'], ['#0E7C7B'], [0,10], 'M'), 0);
+}
+function drawModule3Charts() {
+  setTimeout(() => drawLineChart('c-s1', [t => 4.1*Math.exp(-t)-2.1*Math.exp(-2*t)], ['E2-M1'], ['#0E7C7B'], [0,6], 'M'), 0);
+}
+
+// ── LAPLACE CHART ─────────────────────────────────────────────────────────────
+function drawLaplaceChart() {
+  const canvas = document.getElementById('c-laplace');
+  if (!canvas) return;
+  const W = canvas.offsetWidth || 500, H = 180;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const PAD = { t:10, r:15, b:30, l:50 };
+
+  const f1 = s => (2*s + 6.1) / ((s+1)*(s+2));
+  const f2 = s => Math.min(5, 10*s / ((s*s+1)*(s+1)*(s+2)));
+
+  const s0 = 0.15, s1 = 6;
+  let yMin = Infinity, yMax = -Infinity;
+  for (let i = 0; i <= 200; i++) {
+    const s = s0 + (s1-s0)*i/200;
+    [f1(s), f2(s)].forEach(v => { if (isFinite(v) && Math.abs(v) < 20) { yMin = Math.min(yMin,v); yMax = Math.max(yMax,v); } });
+  }
+  yMin -= 0.2; yMax += 0.2;
+
+  const tX = s => PAD.l + (s-s0)/(s1-s0)*(W-PAD.l-PAD.r);
+  const tY = y => PAD.t + (1-(y-yMin)/(yMax-yMin))*(H-PAD.t-PAD.b);
+
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,255,255,0.07)'; ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){const y=yMin+(yMax-yMin)*i/4;ctx.beginPath();ctx.moveTo(PAD.l,tY(y));ctx.lineTo(W-PAD.r,tY(y));ctx.stroke();}
+  ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(PAD.l,PAD.t);ctx.lineTo(PAD.l,H-PAD.b);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(PAD.l,H-PAD.b);ctx.lineTo(W-PAD.r,H-PAD.b);ctx.stroke();
+
+  [[f1,'#0E7C7B','P₁(s): sistema libre'],[f2,'#E8A838','P₂(s): sistema forzado']].forEach(([fn,col,lbl]) => {
+    ctx.strokeStyle=col; ctx.lineWidth=2; ctx.beginPath();
+    let first=true;
+    for(let i=0;i<=200;i++){
+      const s=s0+(s1-s0)*i/200; const v=fn(s);
+      if(!isFinite(v)||Math.abs(v)>20){first=true;continue;}
+      if(first){ctx.moveTo(tX(s),tY(v));first=false;}else{ctx.lineTo(tX(s),tY(v));}
+    }
+    ctx.stroke();
+  });
+
+  ctx.fillStyle='#8FA3B1'; ctx.font='9px DM Mono,monospace'; ctx.textAlign='center';
+  for(let s=1;s<=6;s++){ctx.fillText(s,tX(s),H-PAD.b+12);}
+  ctx.fillText('s',tX((s0+s1)/2),H-2);
+}
+
+// ── ALL 7 CHART ───────────────────────────────────────────────────────────────
+function drawAllChart() {
+  drawLineChart('c-all7', [
+    t => 2*Math.exp(0.05*t),
+    t => 12*Math.exp(0.05*t)-10,
+    t => 2*Math.exp(0.03*t),
+    t => 4.1*Math.exp(-t)-2.1*Math.exp(-2*t),
+    t => -0.9*Math.exp(-t)+1.9*Math.exp(-2*t)+Math.cos(t)+3*Math.sin(t),
+    t => (2.1+2*t)*Math.exp(-t)-0.1*Math.exp(-2*t),
+    t => 0.55*t+1.117/t+t*t/3,
+  ],[
+    'E1-M1','E1-M2','E1-M3','E2-M1','E2-M2','E2-M3','E2-M4'
+  ],[
+    '#0E7C7B','#E8A838','#E05C3A','#14A89E','#2A9D5C','#8FA3B1','#F6F0E4'
+  ],[1,10],'M COP');
+}
+
+// ── RECOMMENDATIONS ────────────────────────────────────────────────────────────
+const recs = [
+  { profile:'Conservador — Sin aportes externos',           model:'E1-M1: Interés compuesto', cap:'$3.30M',  eq:'P(t) = 2·e^(0.05t)',     desc:'Ideal para quien confía en el interés compuesto sin hacer nada más. El capital crece exponencialmente pero moderado.' },
+  { profile:'Activo — Aportes constantes de $500K/año',     model:'E1-M2: Factor integrante',  cap:'$9.84M',  eq:'P(t) = 12e^(0.05t)−10', desc:'La estrategia más rentable de primer orden. Los aportes regulares generan un efecto multiplicador significativo.' },
+  { profile:'Realista — Considerando inflación del 2%',     model:'E1-M3: Tasa real',          cap:'$2.70M',  eq:'P(t) = 2·e^(0.03t)',     desc:'Perspectiva conservadora y realista. Exige elegir instrumentos que superen la inflación para no perder poder adquisitivo.' },
+  { profile:'Mercado adverso — Sin aportes externos',       model:'E2-M1: Homogéneo',          cap:'~$0',     eq:'P(t) = 4.1e⁻ᵗ − 2.1e⁻²ᵗ', desc:'Sin aportes externos en un mercado con resistencia, el capital se disipa. La resistencia del mercado domina.' },
+  { profile:'Cíclico — Aportes periódicos armónicos',       model:'E2-M2: Coef. indeter.',     cap:'$2.12M',  eq:'P(t) = −0.9e⁻ᵗ+1.9e⁻²ᵗ+cos(t)+3sin(t)', desc:'Los aportes periódicos sostienen oscilaciones estables. Amplitud estacionaria: √10 ≈ $3.16M COP permanente.' },
+  { profile:'Decreciente — Aportes que se reducen con años',model:'E2-M3: Var. parámetros',    cap:'~$0',     eq:'P(t) = (2.1+2t)e⁻ᵗ − 0.1e⁻²ᵗ', desc:'Cuasi-resonancia: impulso inicial luego decaimiento. Aportes decrecientes son insuficientes a largo plazo.' },
+  { profile:'Largo plazo — Horizonte 10–20 años',           model:'E2-M4: Cauchy-Euler',       cap:'$42M',    eq:'P(t) = 0.55t + 1.117/t + t²/3', desc:'Crecimiento cuadrático dominante. Para inversiones a largo plazo con exposición creciente al riesgo: retorno de 2100% a 10 años.' },
+];
+
+function buildRec() {
+  const container = document.getElementById('rec-list');
+  if (!container || container.children.length > 0) return;
+  recs.forEach((r, i) => {
+    const div = document.createElement('div');
+    div.className = 'rec-card';
+    div.innerHTML = `
+      <div class="rec-head" onclick="toggleRec(${i})">
+        <div>
+          <div class="rec-profile">${r.profile}</div>
+          <div class="rec-model">${r.model}</div>
+        </div>
+        <div class="rec-capital">${r.cap}</div>
+      </div>
+      <div class="rec-body" id="rec-body-${i}">
+        <div class="rec-inner">
+          <div class="eq-block" style="font-size:.82rem;margin:.5rem 0;">${r.eq}</div>
+          <p>${r.desc}</p>
+        </div>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function toggleRec(i) {
+  const body = document.getElementById('rec-body-' + i);
+  body.classList.toggle('open');
+}
+
+// ── QUIZ ──────────────────────────────────────────────────────────────────────
+const quizData = [
+  {
+    q: '¿Qué determina si un sistema de 2.° orden es sobreamortiguado, críticamente amortiguado o subamortiguado?',
+    opts: ['El valor de las condiciones iniciales','El discriminante Δ = b² − 4ac de la ecuación característica','La amplitud del término forzante f(t)','El orden del polinomio solución'],
+    ans: 1, fb: 'Correcto. El discriminante Δ clasifica el sistema: Δ>0 sobreamortiguado, Δ=0 críticamente amortiguado, Δ<0 subamortiguado. Las condiciones iniciales solo afectan las constantes C₁ y C₂.'
+  },
+  {
+    q: '¿Cuál es la ventaja principal de la Transformada de Laplace sobre los métodos directos (coeficientes indeterminados, etc.)?',
+    opts: ['Produce soluciones más precisas','Incorpora automáticamente las condiciones iniciales en la ecuación algebraica','Solo funciona para ecuaciones homogéneas','Requiere menos pasos de cálculo siempre'],
+    ans: 1, fb: 'Correcto. La Transformada de Laplace convierte la E.D. en ecuación algebraica e incorpora P(0) y P\'(0) directamente, eliminando el paso de determinar C₁ y C₂ al final.'
+  },
+  {
+    q: 'En el Modelo E2-M2, la amplitud de la respuesta estacionaria cos(t) + 3sin(t) es:',
+    opts: ['4 M COP','1 M COP','√10 ≈ 3.16 M COP','π M COP'],
+    ans: 2, fb: 'Correcto. La amplitud de A·cos(ωt) + B·sin(ωt) es √(A² + B²) = √(1² + 3²) = √10 ≈ 3.162 M COP. Este es el capital que los aportes periódicos sostienen indefinidamente.'
+  },
+  {
+    q: '¿Por qué aparece el factor "te^(−t)" en la solución del Modelo E2-M3?',
+    opts: ['Por error de cálculo en las condiciones iniciales','Porque el término forzante 2e^(−t) coincide con la solución homogénea y₁ = e^(−t) (cuasi-resonancia)','Porque el discriminante es negativo','Porque se usa la ecuación de Cauchy-Euler'],
+    ans: 1, fb: 'Correcto. Cuando f(t) = 2e^(−t) coincide con y₁ = e^(−t), el método de coeficientes indeterminados fallaría. El factor secular "te^(−t)" es la manifestación matemática de la cuasi-resonancia.'
+  },
+  {
+    q: '¿Cuál modelo proyecta el mayor capital a 10 años y qué tipo de crecimiento describe?',
+    opts: ['E1-M2 con $9.84M — crecimiento exponencial con aportes','E2-M4 (Cauchy-Euler) con ~$42M — crecimiento cuadrático dominante (t²/3)','E2-M2 con amplitud estacionaria √10 — oscilaciones armónicas','E1-M1 con $3.30M — interés compuesto puro'],
+    ans: 1, fb: 'Correcto. El modelo de Cauchy-Euler produce P(t) = 0.55t + 1.117/t + t²/3. Para t grande, el término t²/3 domina y P(10) ≈ 0.55(10) + 1.117/10 + 100/3 ≈ 42 M COP, equivalente a un retorno de 2100%.'
+  }
+];
+
+let quizAnswers = new Array(quizData.length).fill(null);
+let quizDone = 0;
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  if (!container || container.children.length > 0) return;
+  quizData.forEach((q, qi) => {
+    const div = document.createElement('div');
+    div.className = 'quiz-q';
+    const optsHtml = q.opts.map((o, oi) =>
+      `<button class="q-opt" onclick="answerQ(${qi},${oi},${q.ans},this)">${String.fromCharCode(65+oi)}. ${o}</button>`
+    ).join('');
+    div.innerHTML = `<div class="q-text">${qi+1}. ${q.q}</div><div class="quiz-opts">${optsHtml}</div>
+      <div class="q-feedback" id="qfb-${qi}"></div>`;
+    container.appendChild(div);
+  });
+}
+
+function answerQ(qi, oi, correct, btn) {
+  const container = btn.closest('.quiz-opts');
+  if (container.querySelector('.locked')) return;
+  const fb = document.getElementById('qfb-' + qi);
+  container.querySelectorAll('.q-opt').forEach((b, i) => {
+    b.classList.add('locked');
+    if (i === correct) b.classList.add('correct');
+  });
+  if (oi === correct) {
+    btn.classList.add('correct');
+    fb.textContent = '✓ ' + quizData[qi].fb;
+    fb.className = 'q-feedback show ok';
+  } else {
+    btn.classList.add('wrong');
+    fb.textContent = '✗ La respuesta correcta es ' + String.fromCharCode(65+correct) + '. ' + quizData[qi].fb;
+    fb.className = 'q-feedback show no';
+  }
+  if (quizAnswers[qi] === null) {
+    quizAnswers[qi] = oi;
+    quizDone++;
+    if (quizDone === quizData.length) showScore();
+  }
+}
+
+function showScore() {
+  const score = quizAnswers.filter((a,i) => a === quizData[i].ans).length;
+  const pct = score / quizData.length * 100;
+  const badge = document.getElementById('score-badge');
+  badge.style.background = `conic-gradient(var(--teal) ${pct}%, rgba(255,255,255,0.1) 0%)`;
+  document.getElementById('score-text').textContent = score + '/' + quizData.length;
+  const titles = ['Sigue practicando','Buen intento','Muy bien','¡Excelente!','¡Dominio perfecto! 🎓'];
+  const msgs = [
+    'Repasa los conceptos de la ecuación característica y las transformadas.',
+    'Buen progreso. Revisa los modelos de segundo orden y la resonancia.',
+    'Comprendes bien los modelos. Profundiza en la Transformada de Laplace.',
+    'Demuestras comprensión sólida de los contenidos del curso.',
+    'Dominio completo. Estás listo para aplicar estos modelos en situaciones reales.'
+  ];
+  const idx = score === 0 ? 0 : score <= 2 ? 1 : score === 3 ? 2 : score === 4 ? 3 : 4;
+  document.getElementById('score-title').textContent = titles[idx];
+  document.getElementById('score-msg').textContent = msgs[idx];
+  document.getElementById('quiz-result').style.display = 'block';
+  document.getElementById('quiz-result').scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  // pre-draw charts when tabs are visible
+  document.querySelectorAll('.slide').forEach(s => {
+    s.querySelectorAll('.tab-panel.active canvas').forEach(c => {
+      const id = c.id;
+      if (id === 'c-m1') chartsDrawn['t-m1'] = false;
+    });
+  });
+});
+
+// Keyboard nav
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' && current < total) goTo(current + 1);
+  if (e.key === 'ArrowLeft'  && current > 0)     goTo(current - 1);
+});
+</script>
+</body>
+</html>
